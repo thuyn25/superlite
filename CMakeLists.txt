@@ -23,11 +23,11 @@ else ()
 endif ()
 
 #-- find OpenMP (cmake -DUSE_OPENMP=ON <src dir>)
-find_package (OpenMP)
-if (OPENMP_FOUND AND USE_OPENMP)
-  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS}")
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
-endif ()
+#find_package (OpenMP)
+#if (OPENMP_FOUND AND USE_OPENMP)
+#  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS}")
+#  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+#endif ()
 
 #-- set the Fortran module directory
 set (CMAKE_Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR})
@@ -44,18 +44,18 @@ list (APPEND SuperLite_FILES "${PROJECT_BINARY_DIR}/mpimod.f")
 add_executable (superlite ${SuperLite_FILES})
 
 #-- find LAPACK and BLAS ! added - gaw
-find_package (BLAS)
-find_package (LAPACK )
-if(LAPACK_FOUND AND BLAS_FOUND)
-  set(lapckblas_libraries ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
-#  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -mkl")
-  target_link_libraries(superlite PRIVATE ${lapackblas_libraries})
-endif ()
+#find_package (BLAS)
+#find_package (LAPACK )
+#if(LAPACK_FOUND AND BLAS_FOUND)
+#  set(lapckblas_libraries ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
+##  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -mkl")
+#  target_link_libraries(superlite PRIVATE ${lapackblas_libraries})
+#endif ()
 
-#find_library (BLA_LIB libblas.so PATH /usr/lib/x86_64-linux-gnu/blas/)
-#find_library (LAPACK_LIB liblapack.so PATH /usr/lib/x86_64-linux-gnu/lapack/)
-#target_link_libraries(superlite PRIVATE ${BLA_LIB})
-#target_link_libraries(superlite PRIVATE ${LAPACK_LIB})
+find_library (BLA_LIB libblas.dylib PATH /opt/homebrew/opt/lapack/lib/)
+find_library (LAPACK_LIB liblapack.dylib PATH /opt/homebrew/opt/lapack/lib/)
+target_link_libraries(superlite PRIVATE ${BLA_LIB})
+target_link_libraries(superlite PRIVATE ${LAPACK_LIB})
 #target_include_directories (superlite PUBLIC "/usr/lib/x86_64-linux-gnu/blas/")
 #target_include_directories (superlite PUBLIC "/usr/lib/x86_64-linux-gnu/lapack/")
 
@@ -73,10 +73,14 @@ if (MPI_Fortran_FOUND AND USE_MPI)
 endif ()
 
 #-- temporary fix for MPI mismatch on latest MacOS
-#set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fallow-argument-mismatch")
+set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fallow-argument-mismatch")
+
+#-- temporary fix for OpenMP
+set(CMAKE_C_COMPILER "/opt/homebrew/opt/llvm/bin/clang")
+set(CMAKE_CXX_COMPILER "/opt/homebrew/opt/llvm/bin/clang++")
 
 #-- indicate successful configuration
 message ("")
 message ("SuperLite Version " ${SuperLite_VERSION_MAJOR} "."
-	${SuperLite_VERSION_MINOR} " configured.")
+  ${SuperLite_VERSION_MINOR} " configured.")
 message ("")

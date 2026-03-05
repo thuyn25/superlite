@@ -43,8 +43,6 @@ parser.add_argument('-t','--truncate',action='store_true',
 parser.add_argument('--tau-thresh',type=float,default=100,
                     help='The Stella calculated optical depth at which'
                     'the profile is truncated')
-parser.add_argument('-n_par','--n_particles',type=int,default=20,
-                    help='number of particles to replace in in_src_n2s')
 parser.add_argument('-s','--sanity-check',action='store_true',
                     help='Check for consistency')
 parser.add_argument('-n','--renorm',action='store_true',
@@ -98,8 +96,6 @@ show = args.show_plots
 
 ### set values
 tau_thresh= args.tau_thresh
-num_particles = args.n_particles
-num_particles = str(num_particles)
 nmerge = args.merge
 
 ### Plot settings
@@ -134,18 +130,15 @@ if not os.path.exists(stella_file):
     sys.exit()
 
 if not os.path.exists(outdir):
-    # mkdir = input("The directory specified for saving the input.str file"
-    #               " doesn't exist.\nCreate a new directory at %s?\nEnter Yes "
-    #               "to continue, anything else to quit: " % outdir)
-    # if mkdir.lower()=='yes':
-    #     os.mkdir(outdir)
-    # else:
-    #     sys.exit()
-    print("The directory specified for saving the input.str file doesn't exist.\nCreate a new directory at %s" % outdir)
-    os.mkdir(outdir)
+    mkdir = input("The directory specified for saving the input.str file"
+                  " doesn't exist.\nCreate a new directory at %s?\nEnter Yes "
+                  "to continue, anything else to quit: " % outdir)
+    if mkdir.lower()=='yes':
+        os.mkdir(outdir)
+    else:
+        sys.exit()
 
 data_stella = load_stella_prof(stella_file)
-data_print = load_stella_prof(stella_file)
 
 if not (verbose or only_info):
     f = open(outdir+'/'+out_prefix+'_profile_day'+day+'.info',"w")
@@ -156,7 +149,6 @@ L_bol =  data_stella['Lum'][-1]
 R_tau_23 = data_stella['r_center_cm'][
     find_nearest_ind(data_stella['tau'],2/3)]
 
-print('HELLO 1', data_stella[-1], type(data_stella), len(data_stella),'\n\n')
 
 print("--------------------------------------------------------")
 print("TOTAL MASS IN THE INPUT MODEL")
@@ -245,18 +237,16 @@ if outdir==os.getcwd():
           " existing input.str file")
 
 data_stella_original = data_stella.copy() # back up original Stella data
-# print('HELLO 1A:', data_stella[-1], len(data_stella), '\n\n')
+
 if truncate:
     ind_tau_thresh = find_nearest_ind(data_stella['tau'],tau_thresh)
-    # print('Model is truncating from tauthres:', tau_thresh, data_stella['tau'][ind_tau_thresh])
     data_stella = data_stella[ind_tau_thresh:]
-    # print('data_stella[ind_tau_thresh]: ', data_stella['tau'][ind_tau_thresh])
     if verbose:
         print("\nTruncating the profile at tau=100, R=%.4e\n" %
               data_stella['r_center_cm'][0])
 else:
     ind_tau_thresh = -1
-# print('HELLO 1B:', data_stella[-1], len(data_stella), '\n\n')
+
 """
 2. Add isotopes of similar type into elemental mass fractions from profile 0
 """
@@ -269,7 +259,7 @@ dt_elem = [('h',float),('he',float),('c',float),('n',float),('o',float),
 
 ### Array for elemental mass fractions
 abund=np.zeros(data_stella.shape,dtype=dt_elem)
-print('abund shape:', len(abund), "this is after data_stella is truncated")
+
 # save isotopic abundances for radioactive isotopes cr48, fe52, co56, & ni56
 for name in abund.dtype.names:
     if (hasNum(name) and name in data_stella.dtype.names):
@@ -504,7 +494,7 @@ if interpolate:
     radtemp_outer = data_stella['Trad'][ind_tau0p1:]
     temp_outer = data_stella['Tavg'][ind_tau0p1:]
     abund_outer = abund[:][ind_tau0p1:]
-print('HELLO 2:', data_stella, len(data_stella), '\n\n')
+
 ### Output files settings
 dt_slite = [('x_left',float),('x_right',float),('vx_left',float),
           ('vx_right',float),('mass',float),('rad_temp',float),('temp',float),
@@ -564,7 +554,7 @@ else:
         if not hasNum(name) and abund[name].any():
             outdata[name]=abund[name][1:]
             nabund+=1
-print(type(outdata))
+
 ### Sanity check
 if any(outdata['mass']<=0):
     print('Error: Mass is <=0 in the output')
@@ -684,10 +674,6 @@ for name in outdata.dtype.names:
 outfile = open(outdir+'/input.str','w')
 print("The new input.str file is created at %s/\n" % outdir)
 outfile.writelines("# 1D spherical\n")
-print(data_stella[-1], type(data_stella), len(data_stella),'\n\n')
-print(data_print[-1], '\n',type(data_print),'\n', len(data_print))
-
-# print("#      "+str(nx)+"          "+str(ny)+" "+str(nz)+" " +str(ncol)+" "+str(nabund)+"\n")
 outfile.writelines("#      "+str(nx)+"          "+str(ny)+" "+str(nz)+" "
                    +str(ncol)+" "+str(nabund)+"\n")
 
@@ -696,33 +682,26 @@ outfile.write("#     x_left")
 for name in outdata.dtype.names[1:]:
     if outdata[name].any():
         spaces = (14-len(name))*' '
-        # print("%s%s" % (spaces,name))
         outfile.write("%s%s" % (spaces,name))
 outfile.write("\n")
 ### data
 for i in range(0,n_zones):
     for name in outdata.dtype.names:
         if outdata[name].any():
-            # print("%.6e  " % (outdata[name][i]))
             outfile.write("%.6e  " % (outdata[name][i]))
     outfile.write("\n")
 outfile.close()
 
 ### update parameters in input.par
-shutil.copy2(home+'/Developer/superlite/src/Input/input.par.lte',
+shutil.copy2(home+'/codes/superlite/src/Input/input.par.lte',
              outdir+'/input.par.lte')
-shutil.copy2(home+'/Developer/superlite/src/Input/input.par.nlte',
+shutil.copy2(home+'/codes/superlite/src/Input/input.par.nlte',
              outdir+'/input.par.nlte')
 
 file = outdir+'/input.par.lte'
 replace_line(file, 13, " in_ndim = %d, 1, 1" % n_zones)
 text = ("%.3e" % L_bol).replace('e','d')
 replace_line(file, 23, " in_L_bol = %s" % text)
-
-# replacing num of particles 
-# num_particles = '23'
-replace_line(file, 22, " in_src_n2s = %s" % num_particles)
-
 if float(day)>=1:
     replace_line(file, 3, "in_name = '%s'"
                  % (out_prefix))
@@ -738,11 +717,6 @@ file = outdir+'/input.par.nlte'
 replace_line(file, 13, " in_ndim = %d, 1, 1" % n_zones)
 text = ("%.3e" % L_bol).replace('e','d')
 replace_line(file, 23, " in_L_bol = %s" % text)
-replace_line(file, 27, "    ")
-
-# replacing num of particles 
-replace_line(file, 22, " in_src_n2s = %s" % num_particles)
-
 if float(day)>=1:
     replace_line(file, 3, "in_name = '%s'"
                  % (out_prefix))
