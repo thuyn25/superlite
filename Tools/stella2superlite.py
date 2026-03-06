@@ -709,19 +709,19 @@ for i in range(0,n_zones):
 outfile.close()
 
 ### update parameters in input.par
-shutil.copy2(home+'/Developer/superlite/src/Input/input.par.lte',
+shutil.copy2(home+'/Developer/superlite/src/Testsuite/A4/5d/lte/input.par',
              outdir+'/input.par.lte')
-shutil.copy2(home+'/Developer/superlite/src/Input/input.par.nlte',
+shutil.copy2(home+'/Developer/superlite/src/Testsuite/A4/5d/nlte/input.par',
              outdir+'/input.par.nlte')
 
 file = outdir+'/input.par.lte'
 replace_line(file, 13, " in_ndim = %d, 1, 1" % n_zones)
 text = ("%.3e" % L_bol).replace('e','d')
-replace_line(file, 23, " in_L_bol = %s" % text)
+replace_line(file, 27, " in_L_bol = %s" % text)
 
 # replacing num of particles 
 # num_particles = '23'
-replace_line(file, 22, " in_src_n2s = %s" % num_particles)
+replace_line(file, 26, " in_src_n2s = %s" % num_particles)
 
 if float(day)>=1:
     replace_line(file, 3, "in_name = '%s'"
@@ -737,11 +737,11 @@ else:
 file = outdir+'/input.par.nlte'
 replace_line(file, 13, " in_ndim = %d, 1, 1" % n_zones)
 text = ("%.3e" % L_bol).replace('e','d')
-replace_line(file, 23, " in_L_bol = %s" % text)
-replace_line(file, 27, "    ")
+replace_line(file, 27, " in_L_bol = %s" % text)
+# replace_line(file, 27, "    ")
 
 # replacing num of particles 
-replace_line(file, 22, " in_src_n2s = %s" % num_particles)
+replace_line(file, 26, " in_src_n2s = %s" % num_particles)
 
 if float(day)>=1:
     replace_line(file, 3, "in_name = '%s'"

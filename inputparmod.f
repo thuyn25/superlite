@@ -418,9 +418,9 @@ c
       end select
 c
 c-- set the number of threads
-c$    if(.false.) then
+c $    if(.false.) then
 c-- serial run
-       in_nomp = 1
+       in_nomp = 4
 c$    else
 c-- openmp run
 c$     if(in_nomp/=0) call omp_set_num_threads(in_nomp)
@@ -431,10 +431,11 @@ c$   &   stop 'read_inputpars: in_nomp error'
 c$     in_nomp = i
 c$omp end parallel
 c$    endif
-      write(6,'(1x,a,2i5,i7)') 'nmpi,in_nomp,#threads        :',
+
+      write(6,'(1x,a,2i5,i7)') 'nmpiHELLO,in_nomp,#threads        :',
      &  nmpi,in_nomp,nmpi*in_nomp
       if(in_io_grabstdout) then
-       write(0,'(1x,a,2i5,i7)') 'nmpi,in_nomp,#threads        :',
+       write(0,'(1x,a,2i5,i7)') 'nmpiHELLO,in_nomp,#threads        :',
      &   nmpi,in_nomp,nmpi*in_nomp
       endif
 c
