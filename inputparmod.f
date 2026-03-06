@@ -420,7 +420,7 @@ c
 c-- set the number of threads
 c $    if(.false.) then
 c-- serial run
-       in_nomp = 4
+       in_nomp = 1
 c$    else
 c-- openmp run
 c$     if(in_nomp/=0) call omp_set_num_threads(in_nomp)
