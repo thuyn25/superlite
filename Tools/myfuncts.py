@@ -8,6 +8,7 @@ Created on Wed Mar 30 15:20:24 2016
 Commonly used functions, some borrowed from internet
 """
 import numpy as np
+import numpy.lib.recfunctions as rfn
 
 # =============================================================================
 # Input: Path to mesa.dayNNN_post_Lbol_max.data file
@@ -32,7 +33,47 @@ def load_stella_prof(file):
     data_stella = np.loadtxt(file,skiprows=7,dtype=dt_stella_prof)
 
     return data_stella
-#
+
+# =============================================================================
+# Input: Path to hydrovars_nt* and composition_nt* file
+# Returns df with profile properties
+# =============================================================================
+def load_blcode_prof(file_hyd, file_comp):
+    dt_blcode_hyd=np.dtype([('ind',int),('m_center_g',float),
+                      ('r_center_cm',float),('avg_rho',float), ('v_center_cmps',float),
+                      ('Prad',float),('Q',float),('e_int',float),('Tavg',float),('n_e',float),
+                      ('entropy',float)])
+    dt_blcode_comp=np.dtype([('ind',int),('m_center_g',float),
+                      ('r_center_cm',float),('h1',float),('he3',float),
+                      ('he4',float),('c12',float),('n14',float),('o16',float),
+                      ('ne20',float), ('mg24',float),('si28',float),
+                      ('s32',float),('ar36',float),('ca40',float),('ti44',float),
+                      ('cr48',float),('cr60',float),('fe52',float),('fe54',float),
+                      ('fe56',float),('co56',float),('ni56',float)])  
+
+    print("\nReading the input file %s\n" % (file_hyd))
+
+    data_blcode_hyd = np.loadtxt(file_hyd,skiprows=2,dtype=dt_blcode_hyd)
+    data_blcode_comp = np.loadtxt(file_comp,skiprows=3,dtype=dt_blcode_comp)
+    # radT = data_blcode_hyd['Tavg']
+    # data_blcode_hyd['Trad'] = radT
+    data_blcode_hyd = rfn.append_fields(
+        base=data_blcode_hyd, 
+        names='Trad', 
+        data=data_blcode_hyd['Tavg'], 
+        usemask=False
+    )
+    abund_cols = list(dt_blcode_comp.names[3:]) 
+    
+    # 2. Merge the base hydro array with the sliced abundance array
+    combined_data = rfn.merge_arrays(
+        [data_blcode_hyd, data_blcode_comp[abund_cols]], 
+        flatten=True, 
+        usemask=False
+    )
+
+    return combined_data
+
 # =============================================================================
 # Find index to the nearest value from an array
 # =============================================================================
