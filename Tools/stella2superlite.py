@@ -40,7 +40,7 @@ parser.add_argument('-d','--day',type=float,default=30,
                     help='The day since L_{bol,max} to create a snapshot')
 parser.add_argument('-t','--truncate',action='store_true',
                     help='Truncate the profile for tau>tau_thresh')
-parser.add_argument('--tau-thresh',type=float,default=100,
+parser.add_argument('--tau-thresh',type=float,default=300,
                     help='The Stella calculated optical depth at which'
                     'the profile is truncated')
 parser.add_argument('-n_par','--n_particles',type=int,default=20,
@@ -78,13 +78,28 @@ out_prefix = args.out_prefix
 
 if day>=1:
     day = int(day)
-if day<10:
+if day < 0:
+    day = int(day)
+elif day == 0:
+    day = int(day)
+if 1<= day<10:
     day = '00'+str(day)
 elif 10<=day<100:
     day = '0'+str(day)
 elif day>=100:
     day = str(day)
+elif -10 < day < 0:
+    day = '-00'+str(abs(day))
+elif -100 < day <= -10:
+    day = '-0'+str(abs(day))
+elif day == 0:
+    day = '000.1'
+else:
+    day = str(day)
 
+day_sub = f'day_{day}'
+outdir = os.path.join(outdir, day_sub)
+print(outdir)
 ### Set flags
 sanity_check = args.sanity_check
 renormalize= args.renorm
@@ -126,6 +141,7 @@ colors = ['#1F77B4','#FF7F0E','#2CA02C','#D62728','#9467BD',
 1b. Read Stella Profile file
 """
 stella_file = stella_profile_path+'/mesa.day'+day+'_post_Lbol_max.data'
+print(stella_file)
 
 if not os.path.exists(stella_file):
     print("The required Stella profile file doesn't exist:\n%s\n"
@@ -142,7 +158,7 @@ if not os.path.exists(outdir):
     # else:
     #     sys.exit()
     print("The directory specified for saving the input.str file doesn't exist.\nCreate a new directory at %s" % outdir)
-    os.mkdir(outdir)
+    os.makedirs(outdir, exist_ok=True)
 
 data_stella = load_stella_prof(stella_file)
 data_print = load_stella_prof(stella_file)
@@ -156,7 +172,7 @@ L_bol =  data_stella['Lum'][-1]
 R_tau_23 = data_stella['r_center_cm'][
     find_nearest_ind(data_stella['tau'],2/3)]
 
-print('HELLO 1', data_stella[-1], type(data_stella), len(data_stella),'\n\n')
+# print('HELLO 1', data_stella[-1], type(data_stella), len(data_stella),'\n\n')
 
 print("--------------------------------------------------------")
 print("TOTAL MASS IN THE INPUT MODEL")

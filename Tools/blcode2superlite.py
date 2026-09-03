@@ -62,7 +62,7 @@ parser.add_argument('-t','--truncate',action='store_true',
 parser.add_argument('--tau-thresh',type=float,default=100,
                     help='The Stella calculated optical depth at which'
                     'the profile is truncated')
-parser.add_argument('-n_par','--n_particles',type=int,default=20,
+parser.add_argument('-n_par','--n_particles',type=int,default=23,
                     help='number of particles to replace in in_src_n2s')
 parser.add_argument('-s','--sanity-check',action='store_true',
                     help='Check for consistency')
