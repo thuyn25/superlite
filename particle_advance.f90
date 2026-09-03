@@ -208,7 +208,8 @@ subroutine particle_advance
         if(ptcl2%itype==1 .or. in_puretran) then
            nstepimc = nstepimc + 1
            call transport(ptcl,ptcl2,vx,vy,vz,rndstate, &
-                eraddens,eamp,jrad,tot_evelo,ierr)
+                eraddens,eamp,jrad,tot_evelo,ierr) !, has_nan,nan_count,nan_indices) !debug
+            
            if(ptcl2%itype/=1) then
               nmethodswap = nmethodswap + 1
               if(in_io_dogrdtally) grd_methodswap(icold) = grd_methodswap(icold) + 1
@@ -252,6 +253,7 @@ subroutine particle_advance
 !-- check exit status
         if(ierr/=0) then !.or. ptcl2%istep>1000) then  !istep checker may cause issues in high-res simulations
            write(0,*) 'pa: ierr,ipart,istep,idist:',ierr,ptcl2%ipart,ptcl2%istep,ptcl2%idist
+          !  write(0,*) 'NaN detected:', nan_count,nan_indices(1:nan_count)
            write(0,*) 'dist:',ptcl2%dist
            write(0,*) 'taus,tauc:',grd_sig(ic)*help,grd_cap(ig,ic)*help
            write(0,*) 'ix,iy,iz,ic,ig:',ptcl2%ix,ptcl2%iy,ptcl2%iz,ptcl2%ic,ptcl2%ig

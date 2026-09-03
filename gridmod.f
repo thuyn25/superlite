@@ -90,7 +90,7 @@ c
       real*8,allocatable :: grd_jrad(:,:) !(ng,ncell) radiation intensity per cell per group
 c
       interface
-      pure function emitgroup(r,ic) result(ig)
+      function emitgroup(r,ic) result(ig)
       integer :: ig
       real*8,intent(in) :: r
       integer,intent(in) :: ic

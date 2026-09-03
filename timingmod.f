@@ -160,7 +160,7 @@ c
       write(6,1) 'output            :',t_output(i)
       write(6,1) 'unaccounted       :',t_all - taccounted
       write(6,*) '----------------------------'
-      write(6,1) 'all               :',t_all
+      write(6,1) 'all HELLO               :',t_all
 1     format(1x,a,10f9.1)
       end subroutine print_timing
 c

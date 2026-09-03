@@ -1,6 +1,6 @@
 !This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 !Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
-pure subroutine transport11(ptcl,ptcl2,vx,vy,vz,rndstate,&
+subroutine transport11(ptcl,ptcl2,vx,vy,vz,rndstate,&
   eraddens,eamp,jrad,totevelo,ierr)
 
   use randommod
@@ -54,6 +54,12 @@ pure subroutine transport11(ptcl,ptcl2,vx,vy,vz,rndstate,&
   ! logical :: lsuplum
   real*8 :: shelp,xhelp,epstol,phi,dphi
   integer :: it
+
+!--debug
+  logical :: has_nan
+  integer :: nan_count
+  integer :: nan_indices(4)
+  integer :: idx
 
 !-- statement function
   integer :: l
@@ -119,10 +125,25 @@ pure subroutine transport11(ptcl,ptcl2,vx,vy,vz,rndstate,&
 !-- effective collision distance
   if(grd_cap(ig,ic)<=0d0) then
      dcol = far
+    !  print *, 'dcol = far; grd_cap(ig,ic):', grd_cap(ig,ic)
   else
      call rnd_r(r1,rndstate)
      dcol = -log(r1)/(elabfact*grd_cap(ig,ic))
+    !  print *, "DEBUG: r1=", r1, "elabfact=", elabfact, "grd_cap(ig,ic)=", grd_cap(ig,ic)
+    !  if (r1 <= 0d0 .or. r1 > 1d0) then
+    !   print *, "ERROR: Invalid r1", r1
+    !  end if
+    !  if (elabfact * grd_cap(ig,ic) == 0d0) then
+    !   print *, "ERROR: Zero denominator"
+    !  end if
+    !  if (elabfact /= elabfact) then
+    !   print *, "ERROR: elabfact is NaN"
+    !  end if
+    !  if (grd_cap(ig,ic) /= grd_cap(ig,ic)) then 
+    !   print *, "ERROR: grd_cap is NaN"
+    !  end if
   endif
+  ! print *, 'hello1'
 !
 !-- Doppler shift distance
 !-- \tilde{v} frame
@@ -200,11 +221,29 @@ pure subroutine transport11(ptcl,ptcl2,vx,vy,vz,rndstate,&
 
 66 continue
 !
-!--finding minimum distance
+!--debug 
+  has_nan = .false.
+  nan_count = 0
+  nan_indices = 0
+
+! !--finding minimum distance
   darr = [dcol,dthm,ddop,db]
   ptcl2%idist = minloc(darr,dim=1)
   d = minval(darr)
+  
   if(any(darr/=darr)) then
+     print *, "DEBUG: r1=", r1, "elabfact=", elabfact, "grd_cap(ig,ic)=", grd_cap(ig,ic)
+     print *, "DEBUG: ig=", ig, "ic=", ic
+     print *, "Hello dcol", dcol
+     print *, "ptcl2%idist:", ptcl2%idist
+     print *, "d: ", d
+     print *, "ix:", ix
+     print *, "grd_xarr(ix+1):", grd_xarr(ix+1)
+     print *, "grd_xarr(ix):", grd_xarr(ix)
+     print *, "NaN detected in darr:", darr
+     idx = minloc(darr, dim=1, mask=(darr /= darr))
+     print *, "NaN at index:", idx
+     print *, "Value at that index:", darr(idx)
      ierr = 3
      return
   endif

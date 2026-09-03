@@ -1,6 +1,6 @@
 !This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 !Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
-pure subroutine diffusion11(ptcl,ptcl2,vx,vy,vz,cache,rndstate,&
+subroutine diffusion11(ptcl,ptcl2,vx,vy,vz,cache,rndstate,&
   eraddens,jrad,totevelo,ierr)
 
   use randommod

@@ -1,6 +1,6 @@
 *This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 *Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
-      pure function emitgroup(r,ic) result(ig)
+      function emitgroup(r,ic) result(ig)
 c     --------------------------------------
       use miscmod
       use groupmod
@@ -29,6 +29,18 @@ c-- search unnormalized cumulative emission probability values
       ig = iep*grd_nepg + 1
       igp1 = min(ig + grd_nepg - 1, grp_ng)
       nepg = igp1 - ig + 1
+      if (any(grd_emitprob(:,ic) /= grd_emitprob(:,ic))) then
+            print *, "ERROR: grd_emitprob(:,ic)=", grd_emitprob(:,ic)
+      endif
+      if (grd_nep /= grd_nep) then
+            print *, "grd_nep=", grd_nep
+      endif
+      if (r1 /= r1) then
+            print *, "ERROR: Invalid r1", r1
+      end if
+      if (iep /= iep) then
+            print *, "ERROR: r1=", r1, "iep=", iep
+      endif
       call specintv(grd_tempinv(ic),nepg,specval,offset=ig)
 c
 c-- start value
